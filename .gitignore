@@ -1,0 +1,4 @@
+*.log
+go.mod
+go.sum
+webapp.sql
