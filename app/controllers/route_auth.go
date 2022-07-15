@@ -7,19 +7,19 @@ import (
 )
 
 func signup(w http.ResponseWriter, r *http.Request) {
-	if r.Method == "GET" {
+	if r.Method == http.MethodGet {
 		_, err := session(w, r)
 		if err != nil {
 			// ログインしていない
-			generateHTML(w, "Hello", "layout", "signup")
+			generateHTML(w, nil, "layout", "public_navbar", "signup")
 		} else {
 			http.Redirect(w, r, "/todos", http.StatusFound)
 		}
 		//generateHTML(w, nil, "layout", "public_navbar", "signup")
-	} else if r.Method == "POST" {
+	} else if r.Method == http.MethodPost {
 		err := r.ParseForm()
 		if err != nil {
-			log.Fatalln(err)
+			log.Println(err)
 		}
 		user := models.User{
 			Name:     r.PostFormValue("name"),
@@ -27,7 +27,7 @@ func signup(w http.ResponseWriter, r *http.Request) {
 			PassWord: r.PostFormValue("password"),
 		}
 		if err := user.CreateUser(); err != nil {
-			log.Fatalln(err)
+			log.Println(err)
 		}
 
 		http.Redirect(w, r, "/", http.StatusFound) //トップにリダイレクトさせる
@@ -38,7 +38,7 @@ func login(w http.ResponseWriter, r *http.Request) {
 	_, err := session(w, r)
 	if err != nil {
 		// ログインしていない
-		generateHTML(w, "Hello", "layout", "login")
+		generateHTML(w, nil, "layout", "public_navbar", "login")
 	} else {
 		http.Redirect(w, r, "/todos", http.StatusFound)
 	}
@@ -46,16 +46,18 @@ func login(w http.ResponseWriter, r *http.Request) {
 
 func authenticate(w http.ResponseWriter, r *http.Request) {
 	err := r.ParseForm()
-
+	if err != nil {
+		log.Println(err)
+	}
 	user, err := models.GetUserByEmail(r.PostFormValue("email"))
 	if err != nil {
-		log.Fatalln(err)
+		log.Println(err)
 		http.Redirect(w, r, "/login", http.StatusFound)
 	}
 	if user.PassWord == models.Hash(r.PostFormValue("password")) {
 		session, err := user.CreateSession()
 		if err != nil {
-			log.Fatalln(err)
+			log.Println(err)
 		}
 
 		//クッキー作成
@@ -67,7 +69,7 @@ func authenticate(w http.ResponseWriter, r *http.Request) {
 		http.SetCookie(w, &cookie)
 		http.Redirect(w, r, "/", http.StatusFound)
 	} else {
-		http.Redirect(w, r, "/login", http.StatusBadRequest)
+		http.Redirect(w, r, "/login", http.StatusFound)
 	}
 }
 
