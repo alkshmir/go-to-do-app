@@ -1,6 +1,7 @@
 package models
 
 import (
+	"fmt"
 	"log"
 	"time"
 )
@@ -103,22 +104,24 @@ func (u *User) CreateSession() (session Session, err error) {
 		log.Fatalln(err)
 	}
 
-	cmd2 := `select id, uuid, email, created_at from sessions where user_id = ? and email = ?`
+	cmd2 := `select id, uuid, email, user_id, created_at from sessions where user_id = ? and email = ?`
 	err = Db.QueryRow(cmd2, u.ID, u.Email).Scan(
 		&session.ID,
 		&session.UUID,
 		&session.Email,
+		&session.UserID,
 		&session.CreatedAt,
 	)
 	return session, err
 }
 
 func (s *Session) CheckSession() (valid bool, err error) {
-	cmd := `select id, uuid, email, created_at from sessions where uuid = ?`
+	cmd := `select id, uuid, email, user_id, created_at from sessions where uuid = ?`
 	err = Db.QueryRow(cmd, s.UUID).Scan(
 		&s.ID,
 		&s.UUID,
 		&s.Email,
+		&s.UserID,
 		&s.CreatedAt,
 	)
 	if err != nil {
@@ -142,7 +145,7 @@ func (s *Session) DeleteSessionByUUID() (err error) {
 
 func (s *Session) GetUserBySession() (user User, err error) {
 	user = User{}
-	cmd := `select id, uuid, name, email, password, created_at from users where id = ?`
+	cmd := `select id, uuid, name, email, created_at from users where id = ?`
 	err = Db.QueryRow(cmd, s.UserID).Scan(
 		&user.ID,
 		&user.UUID,
@@ -150,6 +153,7 @@ func (s *Session) GetUserBySession() (user User, err error) {
 		&user.Email,
 		&user.CreatedAt,
 	)
+	fmt.Println(user, s)
 	return user, err
 
 }

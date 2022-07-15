@@ -10,7 +10,7 @@ func top(w http.ResponseWriter, r *http.Request) {
 	_, err := session(w, r)
 	if err != nil {
 		// ログインしていない
-		generateHTML(w, "Hello", "layout", "public_navbar", "top")
+		generateHTML(w, nil, "layout", "public_navbar", "top")
 	} else {
 		http.Redirect(w, r, "/todos", http.StatusFound)
 	}
@@ -74,6 +74,10 @@ func todoEdit(w http.ResponseWriter, r *http.Request, id int) {
 	if err != nil {
 		http.Redirect(w, r, "/login", 302)
 	} else {
+		err = r.ParseForm()
+		if err != nil {
+			log.Println(err)
+		}
 		_, err := sess.GetUserBySession()
 		if err != nil {
 			log.Println(err)
@@ -113,6 +117,10 @@ func todoDelete(w http.ResponseWriter, r *http.Request, id int) {
 	if err != nil {
 		http.Redirect(w, r, "/login", 302)
 	} else {
+		err = r.ParseForm()
+		if err != nil {
+			log.Println(err)
+		}
 		_, err := sess.GetUserBySession()
 		if err != nil {
 			log.Println(err)

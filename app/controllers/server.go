@@ -20,15 +20,16 @@ func generateHTML(w http.ResponseWriter, data interface{}, filenames ...string) 
 	templates.ExecuteTemplate(w, "layout", data)              //実行するテンプレートを明示的に指定
 }
 
-func session(w http.ResponseWriter, r *http.Request) (session models.Session, err error) {
+func session(w http.ResponseWriter, r *http.Request) (s models.Session, err error) {
 	cookie, err := r.Cookie("_cookie")
 	if err == nil {
-		session = models.Session{UUID: cookie.Value}
-		if ok, _ := session.CheckSession(); !ok {
+		s = models.Session{UUID: cookie.Value}
+		if ok, _ := s.CheckSession(); !ok {
 			err = fmt.Errorf("invalid session")
+			fmt.Println("invalid session")
 		}
 	}
-	return session, err
+	return s, err
 }
 
 var validPath = regexp.MustCompile("^/todos/(edit|update|delete)/([0-9]+)$")
